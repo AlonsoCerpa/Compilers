@@ -1,0 +1,61 @@
+chunk := mult_stat opt_laststat
+mult_stat := stat opt_semicolon mult_stat | lambda
+opt_laststat := laststat opt_semicolon | lambda
+opt_semicolon := ; | lambda
+block := chunk
+stat := varlist = explist | functioncall | do block end
+stat := while exp do block end | repeat block until exp
+stat := if exp then block mult_elseif opt_else end
+mult_elseif := elseif exp then block mult_elseif | lambda
+opt_else := else block | lambda
+stat := for Name = exp , exp opt_comma_exp do block end
+opt_comma_exp := , exp | lambda
+stat := for namelist in explist do block end
+stat := function_def funcname funcbody
+stat := local function_def Name funcbody
+stat := local namelist opt_equal_explist
+opt_equal_explist := = explist | lambda
+laststat := return opt_explist | break
+opt_explist := explist | lambda
+funcname := Name mult_dot_Name opt_colon_Name
+mult_dot_Name := . Name mult_dot_Name | lambda
+opt_colon_Name := : Name | lambda
+varlist := var mult_comma_var
+mult_comma_var := , var mult_comma_var | lambda
+namelist := Name mult_comma_Name
+mult_comma_Name := , Name mult_comma_Name | lambda
+explist := mult_exp_comma exp
+mult_exp_comma := exp , mult_exp_comma | lambda
+exp := nil mult_binop_exp | false mult_binop_exp | true mult_binop_exp
+exp := Number mult_binop_exp | String mult_binop_exp | ... mult_binop_exp
+exp := function_def mult_binop_exp | prefixexp mult_binop_exp
+exp := tableconstructor mult_binop_exp | unop exp mult_binop_exp
+mult_binop_exp := binop exp mult_binop_exp | lambda
+var := Name mult_varSuffix | ( exp ) varSuffix mult_varSuffix
+var_funcs := Name_funcs mult_varSuffix | ( exp ) varSuffix mult_varSuffix
+mult_varSuffix := varSuffix mult_varSuffix | lambda
+prefixexp := varOrExp mult_nameAndArgs
+mult_nameAndArgs := nameAndArgs mult_nameAndArgs | lambda
+functioncall := varOrExp_funcs nameAndArgs mult_nameAndArgs
+varOrExp := var | ( exp )
+varOrExp_funcs := var_funcs | ( exp )
+nameAndArgs := opt_colon_Name args
+opt_colon_Name := : Name | lambda
+varSuffix := mult_nameAndArgs [ exp ] | mult_nameAndArgs . Name
+args := ( opt_explist ) | tableconstructor | String
+function_def := function funcbody
+funcbody := ( opt_parlist ) block end
+opt_parlist := parlist | lambda
+parlist := namelist opt_comma_3points | ...
+opt_comma_3points := , ... | lambda
+tableconstructor := { opt_fieldlist }
+opt_fieldlist := fieldlist | lambda
+fieldlist := field mult_fieldsep_field opt_fieldsep
+mult_fieldsep_field := fieldsep field mult_fieldsep_field | lambda
+opt_fieldsep := fieldsep | lambda
+field := [ exp ] = exp | Name = exp | exp
+fieldsep := , | ;
+binop := + | - | * | / | ^ | % | .. | < | <= | > | >= | == | ~= | and | or
+unop := - | not | #
+Number := INT | FLOAT | EXP | HEX
+String := NORMALSTRING | CHARSTRING | LONGSTRING
